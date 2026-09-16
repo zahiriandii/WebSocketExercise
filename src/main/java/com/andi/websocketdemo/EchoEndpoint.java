@@ -8,6 +8,7 @@ import jakarta.websocket.Session;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.server.ServerEndpoint;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,16 +25,24 @@ public class EchoEndpoint
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        // TODO
+        try {
+            session.getBasicRemote().sendText("Echo: " + message);
+        } catch (IOException e) {
+            System.err.println("Error while sending Echo message: session id =>" + session.getId() + e.getMessage());
+        }
     }
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
         openSessions.remove(session);
+        System.out.println("Echo closed: " + session.getId() + " " + "reason code:" + reason.getCloseCode() + reason.getReasonPhrase());
     }
 
     @OnError
     public void onError(Session session, Throwable error) {
-        // TODO
+        System.err.println("Error occurred with session id: " + session.getId() + ":" + error.getMessage());
+        if (session != null && !session.isOpen()) {
+            openSessions.remove(session);
+        }
     }
 }
