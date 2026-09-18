@@ -25,11 +25,20 @@ public class EchoEndpoint
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        try {
-            session.getBasicRemote().sendText("Echo: " + message);
-        } catch (IOException e) {
-            System.err.println("Error while sending Echo message: session id =>" + session.getId() + e.getMessage());
-        }
+
+        openSessions.forEach(s->
+        {
+            if (!s.isOpen())
+            {
+                return;
+            }
+            s.getAsyncRemote().sendText("Echo : " + message, result -> {
+                if (!result.isOK()) {
+                    System.err.println("Send failed to : " + s.getId() + ": " + result.getException().getMessage());
+                }
+            });
+        });
+
     }
 
     @OnClose
