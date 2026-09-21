@@ -23,7 +23,7 @@ public class EchoEndpoint
         openSessions.add(session);
     }
 
-    @OnMessage
+    @OnMessage(maxMessageSize = 200000)
     public void onMessage(String message, Session session) {
 
         openSessions.forEach(s->
